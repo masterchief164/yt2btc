@@ -303,7 +303,8 @@ def process_audio(source, title, event_date, tags, category, speakers, loc, mode
     return absolute_path
 
 
-def process_videos(source, title, event_date, tags, category, speakers, loc, model, username, curr_time, created_files):
+def process_videos(source, title, event_date, tags, category, speakers, loc, model, username, curr_time, created_files,
+                   chapters):
     print("Playlist detected")
     url = "https://www.youtube.com/playlist?list=" + source
     videos = get_playlist_videos(url)
@@ -316,14 +317,14 @@ def process_videos(source, title, event_date, tags, category, speakers, loc, mod
 
     for video in videos:
         filename = process_video(video, title, event_date, tags, category, speakers, loc, selected_model, username,
-                                 curr_time, created_files)
+                                 curr_time, created_files, chapters)
         if filename is None:
             return None
     return filename
 
 
 def process_video(video, title, event_date, tags, category, speakers, loc, model, username, curr_time, created_files,
-                  local=False):
+                  chapters, local=False):
     result = ""
     print("Transcribing video: " + video)
     if not local:
@@ -339,8 +340,9 @@ def process_video(video, title, event_date, tags, category, speakers, loc, model
     print()
     print()
 
-    chapters = read_description(abs_path[:-4] + '.description')
-    if len(chapters) > 0:
+    if chapters:
+        chapters = read_description(filename[:-4] + '.description')
+    if chapters and len(chapters) > 0:
         print("Chapters detected")
         write_chapters_file(abs_path[:-4] + '.chapters', chapters)
         created_files.append(abs_path[:-4] + '.chapters')
@@ -374,18 +376,20 @@ def process_video(video, title, event_date, tags, category, speakers, loc, model
 
 
 def process_source(source, title, event_date, tags, category, speakers, loc, model, username, curr_time, source_type,
-                   created_files, local=False, test=None):
+                   created_files, chapters, local=False, test=None):
     if source_type == 'audio':
         filename = process_audio(source=source, title=title, event_date=event_date, tags=tags, category=category,
                                  speakers=speakers, loc=loc, model=model, username=username,
                                  curr_time=curr_time, local=local, created_files=created_files, test=test)
     elif source_type == 'playlist':
-        filename = process_videos(source, title, event_date, tags, category, speakers, loc, model, username,
-                                  curr_time, created_files)
+        filename = process_videos(source=source, title=title, event_date=event_date, tags=tags, category=category,
+                                  speakers=speakers, loc=loc, model=model, username=username,
+                                  curr_time=curr_time, created_files=created_files, chapters=chapters)
     else:
-        filename = process_video("https://www.youtube.com/watch?v=" + source, title, event_date, tags, category,
-                                 speakers, loc, model, username,
-                                 curr_time, created_files, local)
+        filename = process_video(video="https://www.youtube.com/watch?v=" + source, title=title, event_date=event_date,
+                                 tags=tags, category=category, speakers=speakers, loc=loc, model=model,
+                                 username=username, curr_time=curr_time, created_files=created_files, local=local,
+                                 chapters=chapters)
     return filename
 
 
