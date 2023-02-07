@@ -115,10 +115,26 @@ def convert_wav_to_mp3(abs_path, filename):
 
 
 def check_if_playlist(media):
-    return media.startswith("PL") \
-        or media.startswith("UU") \
-        or media.startswith("FL") \
-        or media.startswith("RD")
+    try:
+        if media.startswith("PL") \
+                or media.startswith("UU") \
+                or media.startswith("FL") \
+                or media.startswith("RD"):
+            return True
+        pytube.Playlist(media)
+        return True
+    except:
+        return False
+
+
+def check_if_video(media):
+    if re.search(r'^([\dA-Za-z_-]{11})$', media):
+        return True
+    try:
+        pytube.YouTube(media)
+        return True
+    except:
+        return False
 
 
 def get_playlist_videos(url):
@@ -253,20 +269,14 @@ def get_username():
 
 
 def check_source_type(source):
-    if source.startswith("https://www.youtube.com"):
-        if source.find("list=") != -1:
-            return "playlist"
-        else:
-            return "video"
-    elif source.endswith(".mp3") or source.endswith(".wav"):
+    if source.endswith(".mp3") or source.endswith(".wav"):
         return "audio"
-    elif source.startswith("PL") \
-            or source.startswith("UU") \
-            or source.startswith("FL") \
-            or source.startswith("RD"):
+    elif check_if_video(source):
+        return "video"
+    elif check_if_playlist(source):
         return "playlist"
     else:
-        return "video"
+        return 'video'
 
 
 def process_audio(source, title, event_date, tags, category, speakers, loc, model, username, curr_time, local,
