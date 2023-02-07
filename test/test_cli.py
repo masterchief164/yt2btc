@@ -46,7 +46,7 @@ def test_chapter_creation():
         file.write(str(chapters))
     with open("testAssets/test_video_1.chapters", "r") as file:
         data = str(file.read().strip("\n"))
-        with open("testAssets/test_video.chapters", "r") as file:
+        with open("testAssets/test_video_chapters.chapters", "r") as file:
             chapters = str(file.read().strip("\n"))
             assert data == chapters
     os.remove("testAssets/test_video_1.chapters")
